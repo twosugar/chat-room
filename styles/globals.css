@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .chat-container::-webkit-scrollbar-thumb {
+        width: 2px;
+    }
+}
