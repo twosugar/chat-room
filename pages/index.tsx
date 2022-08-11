@@ -1,3 +1,9 @@
+/*
+ * @Description: 
+ * @Date: 2022-07-22 10:43:51
+ * @FilePath: /chat-room/pages/index.tsx
+ * @LastEditTime: 2022-08-11 20:02:52
+ */
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'

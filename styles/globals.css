@@ -6,4 +6,7 @@
     .chat-container::-webkit-scrollbar-thumb {
         width: 2px;
     }
+    textarea, div[contenteditable]:focus{
+        outline: none;
+    }
 }
