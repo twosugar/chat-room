@@ -3,25 +3,26 @@
  * @Author: twosugar
  * @Date: 2022-07-22 15:34:47
  * @FilePath: /chat-room/pages/components/home/ChatContainer.tsx
- * @LastEditTime: 2022-08-11 20:16:56
+ * @LastEditTime: 2022-08-12 19:28:18
  */
 import type { NextComponentType } from "next";
-import { useCallback, useEffect, useRef, useState } from "react";
+import Context from "@/context/index";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Input } from "antd";
-import SocketIO, { Socket } from "socket.io-client";
+import socket from "./socket";
 
 const ChatContainer: NextComponentType = () => {
   const [message, setMessage] = useState("");
-  const [socket, setSocket] = useState<any>(SocketIO());
   const [chatList, setChatList] = useState<any>([]);
   const ref: any = useRef();
+  const context = useContext(Context);
+
   const sendMessage = useCallback(
     (e: any) => {
       if (e.keyCode !== 13 || !message) {
         return;
       }
-      console.log(message, !message);
-      socket.emit("send-message", message);
+      socket.emit("send-message", { message, roomId: context.roomId });
       setTimeout(() => {
         setMessage("");
       }, 0);
@@ -30,21 +31,26 @@ const ChatContainer: NextComponentType = () => {
   );
 
   useEffect(() => {
-    //Strictmode 会触发两次
+    //Strictmode模式 会触发两次
     socket.on("update-server", (data: any) => {
+      console.log("客户端收到的数据", data);
       if (!ref.current) {
         ref.current = [];
       }
       ref.current = [...ref.current, data];
       setChatList(ref.current);
     });
+
     socket.on("connect", () => {
-      console.log(socket.connected, socket.id); // x8WIv7-mJelg7on_ALbx
+      console.log(socket.connected, socket.id);
     });
+
     socket.on("disconnect", () => {
-      console.log(socket.connected, socket.id); // undefined
+      console.log(socket.connected, socket.id);
     });
+
     return () => {
+      console.log("unmount");
       if (socket && socket.connected) {
         socket.disconnect();
       }
@@ -65,7 +71,7 @@ const ChatContainer: NextComponentType = () => {
         <Input.TextArea
           value={message}
           onChange={(e) => {
-            if (e.target.value.trim()) {
+            if (e.target.value && e.target.value !== "\n") {
               setMessage(e.target.value);
             }
           }}
