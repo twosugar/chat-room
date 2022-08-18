@@ -3,7 +3,7 @@
  * @Author: twosugar
  * @Date: 2022-07-22 15:34:47
  * @FilePath: /chat-room/pages/components/home/ChatContainer.tsx
- * @LastEditTime: 2022-08-12 19:28:18
+ * @LastEditTime: 2022-08-18 17:15:47
  */
 import type { NextComponentType } from "next";
 import Context from "@/context/index";
@@ -14,7 +14,6 @@ import socket from "./socket";
 const ChatContainer: NextComponentType = () => {
   const [message, setMessage] = useState("");
   const [chatList, setChatList] = useState<any>([]);
-  const ref: any = useRef();
   const context = useContext(Context);
 
   const sendMessage = useCallback(
@@ -29,33 +28,6 @@ const ChatContainer: NextComponentType = () => {
     },
     [message]
   );
-
-  useEffect(() => {
-    //Strictmode模式 会触发两次
-    socket.on("update-server", (data: any) => {
-      console.log("客户端收到的数据", data);
-      if (!ref.current) {
-        ref.current = [];
-      }
-      ref.current = [...ref.current, data];
-      setChatList(ref.current);
-    });
-
-    socket.on("connect", () => {
-      console.log(socket.connected, socket.id);
-    });
-
-    socket.on("disconnect", () => {
-      console.log(socket.connected, socket.id);
-    });
-
-    return () => {
-      console.log("unmount");
-      if (socket && socket.connected) {
-        socket.disconnect();
-      }
-    };
-  }, []);
 
   return (
     <div className="flex flex-col flex-1 bg-violet-100 h-full">

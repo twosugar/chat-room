@@ -9,4 +9,9 @@
     textarea, div[contenteditable]:focus{
         outline: none;
     }
+    /* tailwindcss 影响了antd icon样式, 这里cover */
+    svg {
+        display: inline;
+        vertical-align: baseline;
+    }
 }

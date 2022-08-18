@@ -2,16 +2,15 @@
  * @Description:
  * @Date: 2022-08-11 18:06:52
  * @FilePath: /chat-room/server.js
- * @LastEditTime: 2022-08-12 19:27:42
+ * @LastEditTime: 2022-08-18 19:23:01
  */
 // server.js
 const next = require("next");
 const Server = require("http").Server;
 const io = require("socket.io");
+const { DB_CONN_STR, hostname, port, dev } = require("./lib/common");
+const MongoClient = require("mongodb").MongoClient;
 
-const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
-const port = 3000;
 const nextApp = next({ dev, hostname, port });
 const handler = nextApp.getRequestHandler();
 
@@ -47,10 +46,29 @@ nextApp
 
       socket.on("send-message", (data = {}) => {
         const { message, roomId } = data;
+        if (!roomId) {
+          return;
+        }
         console.log("服务端收到的数据", data);
+        MongoClient.connect(DB_CONN_STR, async (err, db) => {
+          var dbase = db.db("chatRoom");
+          dbase
+            .collection("chatMessages")
+            .findOneAndUpdate(
+              { roomId },
+              { $push: { data: { userid: "", message } } }
+            )
+            .then((res) => {
+              console.log("聊天信息插入成功", res);
+              db.close();
+            })
+            .catch((err) => {
+              console.log("聊天信息插入失败");
+            });
+        });
         //   socket.emit('update-server', data)
         // socket.broadcast.emit('update-server',message);
-        socket.to(roomId).emit("update-server", message);
+        socket.to(roomId).emit("update-server", data);
       });
 
       socket.on("disconnect", (reason) => {
